@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/delete-photos",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

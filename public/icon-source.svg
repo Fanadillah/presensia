@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="61.44" fill="#f8fafc"/>
+  <rect x="0" y="0" width="512" height="512" rx="113" fill="#2563eb"/>
+  <!-- P letter -->
+  <text x="256" y="245.76" text-anchor="middle" dominant-baseline="central"
+    font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="210" font-weight="800" fill="white" letter-spacing="-6">P</text>
+  <!-- Clock circle at bottom-center of P bowl -->
+  <g transform="translate(317.44, 317.44)">
+    <circle r="48" fill="white" opacity="0.96"/>
+    <circle r="44" fill="none" stroke="#2563eb" stroke-width="6"/>
+    <!-- clock hands: 10:10 style -->
+    <line x1="0" y1="0" x2="0" y2="-22" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="16" y2="10" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+    <circle r="6" fill="#2563eb"/>
+  </g>
+</svg>

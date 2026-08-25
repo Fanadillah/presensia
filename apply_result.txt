@@ -1,0 +1,8 @@
+﻿node.exe : Initialising login role...
+At C:\Users\ILHAM\AppData\Roaming\npm\supabase.ps1:22 char:14
++ ...    $input | & "node$exe"  "$basedir/node_modules/supabase/dist/supaba ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Initialising login role...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
