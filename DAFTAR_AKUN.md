@@ -8,17 +8,17 @@ Semua akun sudah terverifikasi di Supabase Auth dan siap digunakan login.
 
 | No | Nama | Email | Password | Role |
 |----|------|-------|----------|------|
-| 1 | Admin Utama | admin@contoh.com | Rolis2026! | admin |
-| 2 | admin | admin@example.com | password123 | admin |
+| 1 | Admin Utama | admin@contoh.com | ******** | admin |
+| 2 | admin | admin@example.com | ******** | admin |
 
 ## Karyawan
 
 | No | Nama | Email | Password | Role |
 |----|------|-------|----------|------|
-| 1 | Budi Santoso | budi@contoh.com | Rolis2026! | karyawan |
-| 2 | Siti Aminah | siti@contoh.com | Rolis2026! | karyawan |
+| 1 | Budi Santoso | budi@contoh.com | ******** | karyawan |
+| 2 | Siti Aminah | siti@contoh.com | ******** | karyawan |
 
-> Catatan: Password default `Rolis2026!` sebaiknya diganti setelah login pertama.
+> Catatan: Password default `********` sebaiknya diganti setelah login pertama.
 > Akun `admin@example.com` dibuat langsung lewat aplikasi, passwordnya diketahui oleh pembuatnya sendiri.
 
 ---

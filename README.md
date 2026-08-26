@@ -1,64 +1,142 @@
-# Presensia
+# README.md — Presensia
 
-Sistem absensi online berbasis GPS & selfie untuk karyawan Presensia.
+## Tentang
 
-## Fitur
+Sistem absensi online berbasis GPS & selfie untuk karyawan Presensia. Karyawan melakukan check-in/out melalui browser mobile dengan validasi lokasi (geofence) dan foto selfie.
 
-- **Login** - Autentikasi karyawan & admin
-- **Selfie Check-in/Out** - Ambil foto saat absen
-- **GPS & Geofence** - Validasi lokasi otomatis
-- **Dashboard Admin** - Monitoring real-time
-- **Auto-Delete Foto** - Foto terhapus otomatis setiap 3 hari
-- **Mobile-Friendly** - Dirancang untuk diakses dari HP
+### Fitur Utama
+
+- **Login** — Autentikasi karyawan & admin
+- **Selfie Check-in/Out** — Ambil foto saat absen sebagai bukti
+- **GPS & Geofence** — Validasi lokasi otomatis
+- **Dashboard Admin** — Monitoring real-time semua karyawan
+- **Rekap Absensi** — Rekap harian & bulanan otomatis
+- **Audit Log** — Log semua aktivitas sistem
+- **Auto-Delete Foto** — Foto terhapus otomatis setiap 3 hari
+- **Mobile-Friendly** — Dirancang untuk diakses dari HP
+
+---
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
-- Supabase (PostgreSQL + Auth)
-- Cloudflare R2 (Object Storage)
-- Tailwind CSS
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 14, Tailwind CSS, shadcn/ui |
+| Backend | Next.js API Routes |
+| Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| Storage | Cloudinary (25 credits free tier) |
+| Hosting | Vercel |
 
-**100% Gratis** - Semua menggunakan free tier.
+**100% Gratis** — Semua menggunakan free tier.
+
+---
+
+## Screenshots
+
+> Belum tersedia. Akan ditambahkan setelah deployment.
+
+---
 
 ## Quick Start
 
+### Prerequisites
+
+- Node.js 18+
+- npm atau yarn
+- Akun Supabase (gratis)
+- Akun Cloudflare (gratis)
+
+### Instalasi
+
 ```bash
+# Clone repo
+git clone https://github.com/username/presensia.git
+cd presensia
+
 # Install dependencies
 npm install
 
-# Setup R2 bucket (via CLI)
-npm run setup:r2
-
-# Copy environment template
+# Copy environment file
 cp .env.example .env.local
 
-# Isi .env.local dengan credentials Supabase & R2
+# Isi environment variables (lihat SETUP.md)
+# ...
 
-# Jalankan dev server
+# Jalankan development server
 npm run dev
 ```
 
 Buka http://localhost:3000
 
+---
+
 ## Dokumentasi
 
 | Dokumen | Isi |
 |---------|-----|
-| [SETUP.md](../SETUP.md) | Panduan setup lengkap |
-| [DEPLOYMENT.md](../DEPLOYMENT.md) | Panduan deploy |
-| [API.md](../API.md) | API endpoints |
-| [SCHEMA.md](../SCHEMA.md) | Database schema |
+| [PROJECT.md](PROJECT.md) | Overview & Tech Stack |
+| [SCHEMA.md](SCHEMA.md) | Database Schema |
+| [API.md](API.md) | API Endpoints |
+| [COMPONENTS.md](COMPONENTS.md) | Frontend Architecture |
+| [FLOWS.md](FLOWS.md) | User Flow & Business Logic |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment Guide |
+| [TESTING.md](TESTING.md) | Testing Strategy |
+| [SETUP.md](SETUP.md) | Setup Guide |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor Guidelines |
+| [TODO.md](TODO.md) | Feature Checklist |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Visual Architecture |
 
-## Scripts
+---
 
-```bash
-npm run dev           # Jalankan dev server
-npm run build         # Build untuk production
-npm run setup:r2      # Setup R2 bucket (Linux/Mac)
-npm run setup:r2:win  # Setup R2 bucket (Windows)
-npm run cleanup:r2    # Cleanup foto lama
+## Struktur Project
+
 ```
+presensia/
+├── src/
+│   ├── app/              # Pages & API routes
+│   ├── components/       # React components
+│   ├── lib/              # Utilities & helpers
+│   ├── hooks/            # Custom React hooks
+│   └── types/            # TypeScript types
+├── public/               # Static assets
+├── .env.example          # Environment template
+├── package.json
+├── tailwind.config.ts
+├── tsconfig.json
+└── next.config.js
+```
+
+---
+
+## Environment Variables
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+CRON_SECRET=your_random_secret
+```
+
+Lihat [SETUP.md](SETUP.md) untuk panduan lengkap.
+
+---
 
 ## License
 
 MIT License
+
+---
+
+## Kontak
+
+Untuk pertanyaan, buka issue di GitHub atau hubungi tim development.
