@@ -25,7 +25,8 @@ export interface Attendance {
   id: string;
   user_id: string;
   type: 'check_in' | 'check_out';
-  photo_url?: string;
+  photo_url?: string | null;
+  photo_public_id?: string | null;
   latitude?: number;
   longitude?: number;
   accuracy?: number;

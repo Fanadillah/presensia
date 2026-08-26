@@ -37,8 +37,9 @@ export async function proxy(request: NextRequest) {
     // Auth check failed
   }
 
-  const isAuthPage = request.nextUrl.pathname === '/login';
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+  const pathname = request.nextUrl.pathname;
+  const isAuthPage = pathname === '/login' || pathname === '/reset-password';
+  const isApiRoute = pathname.startsWith('/api/');
 
   if (isApiRoute) {
     return supabaseResponse;
@@ -54,6 +55,31 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
+  }
+
+  if (user) {
+    const adminPrefixes = ['/dashboard', '/attendance', '/audit', '/employees', '/leaves', '/payroll', '/announcements'];
+    const ownerPrefixes = ['/settings'];
+    const isAdminRoute = adminPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    const isOwnerRoute = ownerPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+    if (isAdminRoute || isOwnerRoute) {
+      const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
+      const role = (profile as { role?: string } | null)?.role;
+
+      if (isOwnerRoute && role !== 'owner') {
+        const url = request.nextUrl.clone();
+        // admin diarahkan ke dashboard, karyawan ke home
+        url.pathname = role === 'admin' ? '/dashboard' : '/';
+        return NextResponse.redirect(url);
+      }
+
+      if (isAdminRoute && role === 'karyawan') {
+        const url = request.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;

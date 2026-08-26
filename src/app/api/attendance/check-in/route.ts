@@ -74,28 +74,55 @@ export async function POST(request: Request) {
       geofenceName: matchedGeofenceName,
     });
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary (Plan B: simpan public_id untuk cron presisi)
     const uploadResult = await uploadPhoto(watermarked, 'attendance');
     const photoUrl = uploadResult.secure_url;
+    const photoPublicId = uploadResult.public_id;
 
-    // Insert attendance
-    const { data: attendance, error: insertError } = await supabase
-      .from('attendance')
-      .insert({
-        user_id: user.id,
-        type: 'check_in',
-        photo_url: photoUrl,
-        latitude,
-        longitude,
-        accuracy,
-        is_within_geofence: isWithin,
-        geofence_id: matchedGeofenceId,
-        is_late: isLateCheckIn(recordedAtDate),
-        recorded_at: recordedAt,
-      })
-      .select()
-      .single();
-
+    // Insert attendance (fallback jika migrasi photo_public_id belum jalan)
+    let attendance: unknown = null;
+    let insertError: unknown = null;
+    {
+      const res = await supabase
+        .from('attendance')
+        .insert({
+          user_id: user.id,
+          type: 'check_in',
+          photo_url: photoUrl,
+          photo_public_id: photoPublicId,
+          latitude,
+          longitude,
+          accuracy,
+          is_within_geofence: isWithin,
+          geofence_id: matchedGeofenceId,
+          is_late: isLateCheckIn(recordedAtDate),
+          recorded_at: recordedAt,
+        })
+        .select()
+        .single();
+      attendance = res.data;
+      insertError = res.error;
+      if (insertError && String((insertError as { message?: string }).message || '').includes('photo_public_id')) {
+        const retry = await supabase
+          .from('attendance')
+          .insert({
+            user_id: user.id,
+            type: 'check_in',
+            photo_url: photoUrl,
+            latitude,
+            longitude,
+            accuracy,
+            is_within_geofence: isWithin,
+            geofence_id: matchedGeofenceId,
+            is_late: isLateCheckIn(recordedAtDate),
+            recorded_at: recordedAt,
+          })
+          .select()
+          .single();
+        attendance = retry.data;
+        insertError = retry.error;
+      }
+    }
     if (insertError) throw insertError;
 
     // Audit log
