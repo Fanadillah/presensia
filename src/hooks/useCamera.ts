@@ -55,6 +55,9 @@ export function useCamera() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
+    // Mirror selfie so saved photo matches mirrored preview
+    ctx.translate(cw, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, cw, ch);
 
     let blob: Blob | null = null;
@@ -91,6 +94,9 @@ export function useCamera() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
+    // Mirror selfie so saved photo matches mirrored preview
+    ctx.translate(cw, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, cw, ch);
 
     return new Promise((resolve) => {
@@ -109,15 +115,19 @@ export function useCamera() {
   }, []);
 
   const stopCamera = useCallback(() => {
-    state.stream?.getTracks().forEach((t) => t.stop());
-    if (state.photoUrl) URL.revokeObjectURL(state.photoUrl);
-    setState({ stream: null, photo: null, photoUrl: null, loading: false, error: null });
-  }, [state.stream, state.photoUrl]);
+    setState((prev) => {
+      prev.stream?.getTracks().forEach((t) => t.stop());
+      if (prev.photoUrl) URL.revokeObjectURL(prev.photoUrl);
+      return { stream: null, photo: null, photoUrl: null, loading: false, error: null };
+    });
+  }, []);
 
   const resetPhoto = useCallback(() => {
-    if (state.photoUrl) URL.revokeObjectURL(state.photoUrl);
-    setState((prev) => ({ ...prev, photo: null, photoUrl: null }));
-  }, [state.photoUrl]);
+    setState((prev) => {
+      if (prev.photoUrl) URL.revokeObjectURL(prev.photoUrl);
+      return { ...prev, photo: null, photoUrl: null };
+    });
+  }, []);
 
   return {
     ...state,

@@ -23,7 +23,15 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     if (stream && videoRef.current) {
       videoRef.current.srcObject = stream;
     }
-  }, [stream, videoRef]);
+  }, [stream]);
+
+  // Re-attach stream when coming back from preview (video remounted)
+  useEffect(() => {
+    if (!captured && stream && videoRef.current && !loading && !error) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [captured, stream, loading, error]);
 
   const handleCapture = async () => {
     const blob = await capturePhotoAsync();
@@ -44,6 +52,13 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
   const handleRetake = () => {
     resetPhoto();
     setCaptured(false);
+    // Re-attach stream to new video element after retake (video was unmounted when captured)
+    requestAnimationFrame(() => {
+      if (videoRef.current && stream) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+    });
   };
 
   return (
@@ -81,12 +96,12 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
             autoPlay
             playsInline
             muted
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover [transform:scaleX(-1)]"
           />
         )}
 
         {captured && photoUrl && (
-          <img src={photoUrl} alt="Preview" className="h-full w-full object-cover" />
+          <img src={photoUrl} alt="Preview" className="h-full w-full object-cover [transform:scaleX(-1)]" />
         )}
 
         <canvas ref={canvasRef} className="hidden" />
