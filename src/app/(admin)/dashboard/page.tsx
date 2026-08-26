@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Clock3,
   ArrowRight,
-  LogIn,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { createClient } from '@/lib/supabase/client';
@@ -146,29 +145,19 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <PageTitle
-        title="Dashboard"
-        description="Monitoring absensi hari ini"
-        action={
-          <Link
-            href="/absen"
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-primary to-primary-hover px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition-all hover:shadow-lg active:scale-[0.98]"
-          >
-            <LogIn className="h-4 w-4" />
-            Absen Sekarang
-          </Link>
-        }
-      />
+      <PageTitle title="Dashboard" description="Monitoring absensi hari ini" />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {/* Stat cards - cleaner horizontal */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {statCards.map((s) => (
-          <Card key={s.label} className="p-4">
-            <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${s.cls}`}>
+          <Card key={s.label} className="flex items-center gap-3 p-4">
+            <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${s.cls}`}>
               <s.icon className="h-5 w-5" />
             </span>
-            <p className="mt-2.5 text-2xl font-bold tabular-nums text-foreground">{s.value}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
+            <div className="min-w-0">
+              <p className="text-xl font-bold tabular-nums text-foreground leading-none">{s.value}</p>
+              <p className="mt-1 text-xs leading-tight text-muted-foreground line-clamp-2">{s.label}</p>
+            </div>
           </Card>
         ))}
       </div>
