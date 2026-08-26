@@ -13,6 +13,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Owner tidak perlu absen
+    const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
+    if ((profile as { role?: string } | null)?.role === 'owner') {
+      return NextResponse.json({ success: false, error: 'Owner tidak perlu absen' }, { status: 403 });
+    }
+
     const formData = await request.formData();
     const photo = formData.get('photo') as File;
     const latitude = parseFloat(formData.get('latitude') as string);

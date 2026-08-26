@@ -48,7 +48,6 @@ export const adminMenu: MenuItem[] = [
 
 export const ownerMenu: MenuItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/absen', label: 'Absen', icon: LogIn },
   { href: '/attendance', label: 'Rekap Absensi', icon: ClipboardList },
   { href: '/payroll', label: 'Rekap Gaji', icon: Wallet },
   { href: '/employees', label: 'Karyawan', icon: Users },

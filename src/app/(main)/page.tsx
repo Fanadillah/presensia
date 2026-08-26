@@ -7,18 +7,22 @@ import { NearbyOffice } from '@/components/home/NearbyOffice';
 import { Announcements } from '@/components/home/Announcements';
 import { RecentHistory } from '@/components/home/RecentHistory';
 import { PresenceCalendar } from '@/components/calendar/PresenceCalendar';
+import { AdminQuickCard } from '@/components/home/AdminQuickCard';
 import { useMonthlyPresence } from '@/hooks/useMonthlyPresence';
 import { useHolidays } from '@/hooks/useHolidays';
+import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/Card';
 
 export default function HomePage() {
   const now = new Date();
   const presence = useMonthlyPresence(now.getFullYear(), now.getMonth() + 1);
   const holidays = useHolidays();
+  const { user } = useAuth();
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
       <Hero />
+      {user?.role === 'admin' && <AdminQuickCard />}
       <TodayStatusCard />
       <MonthlyStats />
 

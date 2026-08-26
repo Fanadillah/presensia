@@ -60,8 +60,21 @@ export async function proxy(request: NextRequest) {
   if (user) {
     const adminPrefixes = ['/dashboard', '/attendance', '/audit', '/employees', '/leaves', '/payroll', '/announcements'];
     const ownerPrefixes = ['/settings'];
+    const ownerBlockedPrefixes = ['/absen', '/history', '/leave'];
     const isAdminRoute = adminPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
     const isOwnerRoute = ownerPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    const isOwnerBlocked = ownerBlockedPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+    // Owner tidak boleh akses halaman personal absen/history/cuti karyawan
+    if (isOwnerBlocked) {
+      const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
+      const role = (profile as { role?: string } | null)?.role;
+      if (role === 'owner') {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        return NextResponse.redirect(url);
+      }
+    }
 
     if (isAdminRoute || isOwnerRoute) {
       const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).maybeSingle();
