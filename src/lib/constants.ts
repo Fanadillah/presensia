@@ -34,3 +34,5 @@ export const WORK_SCHEDULE = {
   CHECK_OUT_END: '18:00',
   LATE_THRESHOLD_MINUTES: 15,
 } as const;
+
+export const DEFAULT_WORK_SCHEDULE = WORK_SCHEDULE;

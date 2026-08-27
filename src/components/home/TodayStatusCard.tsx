@@ -6,6 +6,9 @@ import { LogIn, LogOut, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useAttendance } from '@/hooks/useAttendance';
 import { useNow } from '@/components/shared/LiveClock';
 import { formatWorkDuration, isLateCheckIn } from '@/lib/attendance';
+import { createClient } from '@/lib/supabase/client';
+import { getWorkScheduleClient, lateLabel, type WorkSchedule } from '@/lib/schedule';
+import { Clock3 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 
@@ -14,6 +17,7 @@ export function TodayStatusCard() {
   const now = useNow(30000);
   const [today, setToday] = useState<Awaited<ReturnType<typeof getToday>>>(null);
   const [loading, setLoading] = useState(true);
+  const [schedule, setSchedule] = useState<WorkSchedule | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,6 +31,13 @@ export function TodayStatusCard() {
       cancelled = true;
     };
   }, [getToday, now]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('settings').select('key,value').in('key', ['check_in_start','check_in_end','late_threshold_minutes']).then(({ data }: { data: any }) => {
+      setSchedule(getWorkScheduleClient(data as any));
+    });
+  }, []);
 
   if (loading) return <SkeletonCard />;
 
@@ -51,7 +62,15 @@ export function TodayStatusCard() {
     <section className="rounded-card border border-border bg-surface p-5 shadow-card sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">Absensi Hari Ini</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold text-foreground">Absensi Hari Ini</h2>
+            {schedule && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                <Clock3 className="h-3 w-3" />
+                {schedule.checkInStart} • Telat &gt;{lateLabel(schedule)}
+              </span>
+            )}
+          </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
             <div>
@@ -60,7 +79,7 @@ export function TodayStatusCard() {
                 <span className="text-lg font-bold tabular-nums text-foreground">
                   {fmt(today?.check_in?.recorded_at)}
                 </span>
-                {today?.check_in && isLateCheckIn(today.check_in.recorded_at) && (
+                {today?.check_in && isLateCheckIn(today.check_in.recorded_at, schedule || undefined) && (
                   <Badge variant="warning">Terlambat</Badge>
                 )}
               </div>

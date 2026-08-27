@@ -1,4 +1,5 @@
-import { WORK_SCHEDULE } from './constants';
+import { WORK_SCHEDULE, DEFAULT_WORK_SCHEDULE } from './constants';
+import type { WorkSchedule } from './schedule';
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -6,11 +7,11 @@ function timeToMinutes(time: string): number {
 }
 
 /** Menit dari tengah malam saat batas terlambat (jam masuk + toleransi). */
-export function lateThresholdMinutes(): number {
-  return (
-    timeToMinutes(WORK_SCHEDULE.CHECK_IN_START) +
-    WORK_SCHEDULE.LATE_THRESHOLD_MINUTES
-  );
+export function lateThresholdMinutes(schedule?: WorkSchedule): number {
+  const s = schedule || DEFAULT_WORK_SCHEDULE as unknown as WorkSchedule & { checkInStart: string; lateThresholdMinutes: number };
+  const start = (s as any).checkInStart || (s as any).CHECK_IN_START || WORK_SCHEDULE.CHECK_IN_START;
+  const thr = (s as any).lateThresholdMinutes ?? (s as any).LATE_THRESHOLD_MINUTES ?? WORK_SCHEDULE.LATE_THRESHOLD_MINUTES;
+  return timeToMinutes(start) + thr;
 }
 
 export function minutesOfDay(date: Date): number {
@@ -18,9 +19,9 @@ export function minutesOfDay(date: Date): number {
 }
 
 /** True jika check-in melewati batas terlambat. */
-export function isLateCheckIn(recordedAt: string | Date): boolean {
+export function isLateCheckIn(recordedAt: string | Date, schedule?: WorkSchedule): boolean {
   const d = typeof recordedAt === 'string' ? new Date(recordedAt) : recordedAt;
-  return minutesOfDay(d) > lateThresholdMinutes();
+  return minutesOfDay(d) > lateThresholdMinutes(schedule);
 }
 
 export function formatWorkDuration(minutes: number): string {

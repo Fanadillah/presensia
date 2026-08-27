@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { uploadPhoto } from '@/lib/cloudinary';
 import { isWithinGeofence } from '@/lib/geofence';
 import { isLateCheckIn } from '@/lib/attendance';
+import { getWorkScheduleForUser } from '@/lib/schedule';
 import { addAttendanceWatermark } from '@/lib/watermark';
 
 export async function POST(request: Request) {
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
 
     const recordedAtDate = new Date();
     const recordedAt = recordedAtDate.toISOString();
+    const schedule = await getWorkScheduleForUser(user.id, serviceSupabase);
 
     // Watermark foto: tanggal-jam + koordinat + status area
     const watermarked = await addAttendanceWatermark(Buffer.from(await photo.arrayBuffer()), {
@@ -101,7 +103,7 @@ export async function POST(request: Request) {
           accuracy,
           is_within_geofence: isWithin,
           geofence_id: matchedGeofenceId,
-          is_late: isLateCheckIn(recordedAtDate),
+          is_late: isLateCheckIn(recordedAtDate, schedule),
           recorded_at: recordedAt,
         })
         .select()
@@ -120,7 +122,7 @@ export async function POST(request: Request) {
             accuracy,
             is_within_geofence: isWithin,
             geofence_id: matchedGeofenceId,
-            is_late: isLateCheckIn(recordedAtDate),
+            is_late: isLateCheckIn(recordedAtDate, schedule),
             recorded_at: recordedAt,
           })
           .select()
@@ -141,7 +143,7 @@ export async function POST(request: Request) {
         accuracy,
         is_within_geofence: isWithin,
         geofence_name: matchedGeofenceName,
-        is_late: isLateCheckIn(recordedAtDate),
+        is_late: isLateCheckIn(recordedAtDate, schedule),
       },
     });
 

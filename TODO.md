@@ -134,3 +134,28 @@
 - [x] Dashboard grafik (chart) (recharts BarChart 7 hari)
 - [x] Laporan PDF (attendance/page.tsx: window.print)
 - [ ] Integration dengan sistem HR lain
+
+---
+
+## Fase 10: Shift Fleksibel (Backlog - Kepikiran, Nanti)
+
+**Status:** Plan approved, Fase 1 Plan C shift-ready (`getWorkScheduleForUser` + `use_shift_mode=false`). Belum dikerjakan sekarang.
+
+**Kebutuhan Owner:** Bikin shift bebas (nama + jam), rotasi manual tiap minggu, assign per orang & per divisi, fallback global `08:00` `app/src/lib/constants.ts:30`.
+
+**Schema Nanti (migrasi baru):**
+- `divisions (id uuid PK, name text, created_by uuid)` + `users.division_id uuid FK -> divisions.id`
+- `shifts (id uuid PK, name text, check_in_start time, check_in_end time, check_out_start time, check_out_end time, late_threshold_minutes int, color text, is_active bool)`
+- `shift_assignments (id uuid PK, user_id uuid NULL FK -> users.id, division_id uuid NULL FK -> divisions.id, shift_id uuid FK -> shifts.id, effective_from date, effective_to date, created_by uuid, CHECK user_id IS NOT NULL OR division_id IS NOT NULL)` prioritas: `user_id` override `division_id` > fallback `global settings` `SETUP.md:144`
+- `settings` tambah `use_shift_mode='false'` boolean toggle `app/src/app/(owner)/settings/page.tsx:63`
+
+**Logic Nanti:**
+- `app/src/lib/schedule.ts:1` `getWorkScheduleForUser(userId, serviceSupabase)` sekarang return globalSettings; Fase 2 branch `if(use_shift_mode) return resolveShift(userId)` dengan prioritas di atas -> `isLateCheckIn(date, schedule)` `app/src/lib/attendance.ts:21` tetap pakai schedule param (sudah shift-aware).
+- Server `app/src/app/api/attendance/check-in/route.ts:104` dan client `TodayStatusCard.tsx:63` pakai fungsi sama.
+
+**UI Nanti:**
+- `/settings` tab `Jadwal Global` + `Kelola Shift` CRUD + toggle `Aktifkan Mode Shift` + color picker
+- `/employees` filter divisi + kolom Shift + bulk `Set Shift` (pilih shift + `effective_from = Senin depan` date picker) manual rotasi mingguan (bukan auto).
+- `payroll/page.tsx:49` & `dashboard/page.tsx:108` tetap hitung `is_late` via schedule (tidak berubah logika agregasi).
+
+**Catatan:** Rotasi manual mingguan (C1), bukan auto muter. Owner bikin bebas (2/3 shift atau lebih). Default fallback `08:00/08:15` jika tanpa divisi/shift.
