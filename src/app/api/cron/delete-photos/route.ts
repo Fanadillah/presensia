@@ -122,6 +122,34 @@ export async function POST(request: Request) {
       }
     }
 
+    // Leave attachments 3 hari juga (Opsi C)
+    let leaveDestroyed = 0;
+    let leaveNulled = 0;
+    {
+      const { data: leaveRows } = await supabase
+        .from('leave_requests')
+        .select('id, attachment_public_id')
+        .not('attachment_public_id', 'is', null)
+        .lt('created_at', cutoffIso)
+        .limit(BATCH);
+      if (leaveRows && (leaveRows as any[]).length > 0) {
+        for (const r of leaveRows as { id: string; attachment_public_id: string }[]) {
+          try { await deletePhoto(r.attachment_public_id); leaveDestroyed++; } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            if (msg.toLowerCase().includes('not found')) leaveDestroyed++;
+            else console.error('leave delete fail', r.attachment_public_id, e);
+          }
+        }
+        const ids = (leaveRows as { id: string }[]).map(r=>r.id);
+        const { error: leaveErr } = await supabase.from('leave_requests').update({ attachment_url: null, attachment_public_id: null } as any).in('id', ids);
+        if (!leaveErr) leaveNulled = ids.length;
+        else if (leaveErr.message.includes('attachment')) {
+          await supabase.from('leave_requests').update({ attachment_url: null } as any).in('id', ids);
+          leaveNulled = ids.length;
+        }
+      }
+    }
+
     await supabase.from('audit_log').insert({
       action: 'cron_delete_photos',
       details: {
@@ -130,6 +158,8 @@ export async function POST(request: Request) {
         destroyed_by_public_id: destroyedByPublicId,
         destroyed_legacy_scan: destroyedLegacy,
         db_nulled: dbNulled,
+        leave_destroyed: leaveDestroyed,
+        leave_nulled: leaveNulled,
         failed_count: failedIds.length,
         mode: 'plan_b',
       },
@@ -143,6 +173,8 @@ export async function POST(request: Request) {
         destroyed_by_public_id: destroyedByPublicId,
         destroyed_legacy_scan: destroyedLegacy,
         db_nulled: dbNulled,
+        leave_destroyed: leaveDestroyed,
+        leave_nulled: leaveNulled,
         failed_count: failedIds.length,
       },
     });

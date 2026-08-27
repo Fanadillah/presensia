@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { PlaneTakeoff, Trash2, XCircle, CheckCircle2, Clock3, FileText } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { PlaneTakeoff, Trash2, XCircle, CheckCircle2, Clock3, FileText, Camera, Upload, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { CameraCapture } from '@/components/attendance/CameraCapture';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Modal } from '@/components/shared/Modal';
 import { useToast } from '@/components/shared/Toast';
@@ -31,6 +32,25 @@ export function LeaveTab() {
   });
   const [saving, setSaving] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<LeaveRequest | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (f: File | null) => {
+    if (!f) { setFile(null); if (preview) URL.revokeObjectURL(preview); setPreview(null); return; }
+    if (f.size > 5 * 1024 * 1024) { toast.addToast('error', 'File max 5MB'); return; }
+    if (!['image/jpeg','image/png','image/webp'].includes(f.type)) { toast.addToast('error', 'Hanya JPG/PNG/WEBP'); return; }
+    setFile(f);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(URL.createObjectURL(f));
+  };
+
+  const handleCamera = (blob: Blob) => {
+    const f = new File([blob], 'surat-sakit.jpg', { type: 'image/jpeg' });
+    handleFile(f);
+    setCameraOpen(false);
+  };
 
   const handleSubmit = async () => {
     if (!form.reason.trim()) {
@@ -42,32 +62,25 @@ export function LeaveTab() {
       return;
     }
     setSaving(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { error: err } = await supabase.from('leave_requests').insert({
-      user_id: user.id,
-      type: form.type,
-      start_date: form.start_date,
-      end_date: form.end_date,
-      reason: form.reason.trim(),
-    });
-    setSaving(false);
-
-    if (err && /relation|does not exist|schema/i.test(err.message)) {
-      toast.addToast('warning', 'Fitur belum aktif. Jalankan migration SQL terlebih dahulu.');
-      return;
-    }
-    if (err) {
-      toast.addToast('error', `Gagal mengirim pengajuan: ${err.message}`);
-      return;
-    }
-    toast.addToast('success', 'Pengajuan terkirim, menunggu persetujuan admin');
-    setFormOpen(false);
-    setForm({ ...form, reason: '' });
-    refetch();
+    try {
+      const fd = new FormData();
+      fd.append('type', form.type);
+      fd.append('start_date', form.start_date);
+      fd.append('end_date', form.end_date);
+      fd.append('reason', form.reason.trim());
+      if (form.type === 'sakit' && file) fd.append('file', file);
+      const res = await fetch('/api/leaves', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal');
+      toast.addToast('success', 'Pengajuan terkirim, menunggu persetujuan admin');
+      setFormOpen(false);
+      setForm({ ...form, reason: '' });
+      setFile(null); if (preview) URL.revokeObjectURL(preview); setPreview(null);
+      refetch();
+    } catch (e: any) {
+      if (/relation|does not exist|schema/i.test(e.message)) toast.addToast('warning', 'Fitur belum aktif. Jalankan migration SQL terlebih dahulu.');
+      else toast.addToast('error', `Gagal: ${e.message}`);
+    } finally { setSaving(false); }
   };
 
   const handleCancel = async () => {
@@ -155,6 +168,8 @@ export function LeaveTab() {
                       })}`}
                   </p>
                   <p className="mt-0.5 text-sm text-muted-foreground">{l.reason}</p>
+                  {(l as any).attachment_url && <a href={(l as any).attachment_url} target="_blank" rel="noopener" className="mt-2 block"><img src={(l as any).attachment_url} alt="surat sakit" className="max-h-32 rounded-xl border object-contain" /></a>}
+                  {l.type==='sakit' && !(l as any).attachment_url && <p className="mt-1 text-xs text-muted-foreground">Tanpa surat</p>}
                   {l.review_note && (
                     <p className="mt-1 rounded-lg bg-surface-muted/60 p-2 text-xs text-muted-foreground">
                       Catatan admin: {l.review_note}
@@ -172,6 +187,7 @@ export function LeaveTab() {
         </div>
       )}
 
+      {cameraOpen && <CameraCapture onCapture={handleCamera} onClose={() => setCameraOpen(false)} />}
       <Modal open={formOpen} onClose={() => setFormOpen(false)} title="Ajukan Cuti / Izin">
         <div className="space-y-4">
           <Select label="Jenis" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
@@ -189,6 +205,19 @@ export function LeaveTab() {
             onChange={(e) => setForm({ ...form, reason: e.target.value })}
             placeholder="Contoh: acara keluarga"
           />
+          {form.type === 'sakit' && (
+            <div className="rounded-xl border border-dashed border-border bg-surface-muted/30 p-3">
+              <p className="text-xs font-medium text-muted-foreground">Foto surat sakit (opsional, auto-hapus 3 hari) — Kamera atau Galeri</p>
+              <div className="mt-2 flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setCameraOpen(true)}><Camera className="h-4 w-4" /> Kamera</Button>
+                <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Galeri</Button>
+                {file && <Button variant="ghost" size="sm" onClick={() => handleFile(null)}><X className="h-4 w-4" /> Hapus</Button>}
+              </div>
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => handleFile(e.target.files?.[0] || null)} />
+              {preview && <img src={preview} alt="preview" className="mt-3 max-h-48 rounded-xl border object-contain" />}
+              {file && <p className="mt-1 text-xs text-muted-foreground">{file.name} • {(file.size/1024).toFixed(0)} KB</p>}
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="secondary" onClick={() => setFormOpen(false)}>
               Batal

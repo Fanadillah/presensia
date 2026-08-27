@@ -130,6 +130,12 @@ export function LeaveAdminTab() {
                       })}`}
                   </p>
                   <p className="mt-0.5 text-sm text-foreground/90">{l.reason}</p>
+                  {(l as any).attachment_url && (
+                    <a href={(l as any).attachment_url} target="_blank" rel="noopener" className="mt-2 inline-block">
+                      <img src={(l as any).attachment_url} alt="surat sakit" className="max-h-40 rounded-xl border object-contain" />
+                    </a>
+                  )}
+                  {l.type==='sakit' && !(l as any).attachment_url && <p className="mt-1 text-xs text-muted-foreground">Tanpa surat</p>}
                   {l.review_note && (
                     <p className="mt-1 rounded-lg bg-surface-muted/60 p-2 text-xs text-muted-foreground">
                       Catatan: {l.review_note}

@@ -159,3 +159,25 @@
 - `payroll/page.tsx:49` & `dashboard/page.tsx:108` tetap hitung `is_late` via schedule (tidak berubah logika agregasi).
 
 **Catatan:** Rotasi manual mingguan (C1), bukan auto muter. Owner bikin bebas (2/3 shift atau lebih). Default fallback `08:00/08:15` jika tanpa divisi/shift.
+
+---
+
+## Fase 11: Surat Sakit Foto Opsional (Opsi C - Backlog, Nanti)
+
+**Status:** Plan approved Opsi C - foto surat sakit opsional (boleh kamera langsung atau upload galeri), auto-hapus 3 hari seperti absensi. Belum dikerjakan sekarang.
+
+**Kebutuhan:** `sakit` di `leave_requests.type='sakit'` `migrations/20260823000000_redesign.sql:86` boleh tanpa foto, tapi jika ada foto lebih dipercaya saat approve.
+
+**Schema Nanti:**
+- `ALTER TABLE leave_requests ADD attachment_url text, attachment_public_id text` + index `WHERE attachment_public_id IS NOT NULL` (mirip `attendance 20260824000000_photo_public_id.sql:9`)
+- `types/index.ts:115` `LeaveRequest { attachment_url?: string|null; attachment_public_id?: string|null }`
+
+**Flow Nanti (reuse attendance pipeline `cloudinary.ts:20` `uploadPhoto`):**
+- `LeaveTab.tsx:18` jika `type==='sakit'` tampil dual opsi: `Ambil Foto` (reuse `CameraCapture.tsx:9`) + `Upload Galeri` `<input type=file accept=image/jpeg/png/webp>` + preview + validasi `MAX_PHOTO_SIZE 5MB` `constants.ts:17`, `PHOTO_CLIENT_MAX_WIDTH 1024` `compress.ts`
+- `if(file)` -> `uploadPhoto(buffer,'leave')` -> `insert { user_id, type, start_date, end_date, reason, attachment_url: secure_url, attachment_public_id: public_id }` else insert biasa (opsional)
+- `LeaveAdminTab.tsx:109` tampil thumb `<img src=attachment_url>` + Modal lightbox, badge `Tanpa surat` jika `sakit && !attachment_url`
+- `cron/delete-photos` perluas: `leave_requests where created_at < now-3d AND attachment_public_id IS NOT NULL` -> `deletePhoto` + `update {attachment_url:null, attachment_public_id:null}` pakai `PHOTO_RETENTION_DAYS=3`
+
+**Help:** `help/page.tsx:72` tambah `Jika Sakit: foto surat dokter opsional (kamera/galeri), auto-hapus 3 hari`.
+
+**Pilihan:** Opsi C (opsional keduanya) yang disetujui 27 Aug 2026 - bukan wajib, bukan hapus.

@@ -122,6 +122,8 @@ export interface LeaveRequest {
   status: 'pending' | 'approved' | 'rejected';
   reviewed_by?: string | null;
   review_note?: string | null;
+  attachment_url?: string | null;
+  attachment_public_id?: string | null;
   created_at: string;
   user?: User | null;
 }
