@@ -131,47 +131,55 @@ export default function DashboardPage() {
   }
 
   const statCards = [
-    { label: 'Total Karyawan', value: stats.total, icon: Users, cls: 'bg-primary/10 text-primary' },
-    { label: 'Sudah Check-in', value: stats.checkedIn, icon: UserCheck, cls: 'bg-success-soft text-success' },
+    { label: 'Total Karyawan', value: stats.total, icon: Users, cls: 'bg-primary/10 text-primary', border: 'border-l-primary' },
+    { label: 'Sudah Check-in', value: stats.checkedIn, icon: UserCheck, cls: 'bg-success-soft text-success', border: 'border-l-success' },
     {
       label: todayIsOff ? 'Belum Absen (Libur)' : 'Belum Check-in',
       value: todayIsOff ? 0 : stats.notYetIds.length,
       icon: UserX,
       cls: 'bg-warning-soft text-warning',
+      border: 'border-l-warning',
     },
-    { label: 'Terlambat', value: stats.late, icon: Clock3, cls: 'bg-warning-soft text-warning' },
-    { label: 'Di Luar Area', value: stats.outArea, icon: AlertTriangle, cls: 'bg-danger-soft text-danger' },
+    { label: 'Terlambat', value: stats.late, icon: Clock3, cls: 'bg-orange-50 text-orange-600', border: 'border-l-orange-500', extra: stats.outArea > 0 ? `+${stats.outArea} di luar area` : null },
   ];
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <PageTitle title="Dashboard" description="Monitoring absensi hari ini" />
 
-      {/* Stat cards - cleaner horizontal */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      {/* Stat cards - minimal clean 4 col, border accent */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {statCards.map((s) => (
-          <Card key={s.label} className="flex items-center gap-3 p-4">
-            <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${s.cls}`}>
+          <Card key={s.label} className={`flex items-center gap-3 border-l-4 p-4 ${s.border}`}>
+            <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${s.cls}`}>
               <s.icon className="h-5 w-5" />
             </span>
-            <div className="min-w-0">
-              <p className="text-xl font-bold tabular-nums text-foreground leading-none">{s.value}</p>
-              <p className="mt-1 text-xs leading-tight text-muted-foreground line-clamp-2">{s.label}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-2xl font-bold tabular-nums text-foreground leading-none">{s.value}</p>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground line-clamp-2">{s.label}</p>
+              {(s as any).extra && <p className="mt-1 text-xs font-medium text-danger">{(s as any).extra}</p>}
             </div>
           </Card>
         ))}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-5">
-        {/* Grafik mingguan */}
-        <Card className="p-5 lg:col-span-3">
-          <h3 className="mb-4 font-semibold text-foreground">Tren Kehadiran 7 Hari Terakhir</h3>
-          <div className="h-64">
+        {/* Grafik mingguan - hero */}
+        <Card className="p-6 shadow-card-lg lg:col-span-3">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">Tren Kehadiran 7 Hari Terakhir</h3>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" /> Hadir</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]" /> Telat</span>
+            </div>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">Hadir hijau • Telat amber — 7 hari terakhir</p>
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weekData} barGap={2}>
+              <BarChart data={weekData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={24} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={28} />
                 <ChartTooltip
                   cursor={{ fill: 'var(--surface-muted)' }}
                   contentStyle={{
@@ -181,19 +189,20 @@ export default function DashboardPage() {
                     fontSize: 13,
                   }}
                 />
-                <Bar dataKey="hadir" name="Hadir" fill="#16a34a" radius={[6, 6, 0, 0]} maxBarSize={28} />
-                <Bar dataKey="terlambat" name="Terlambat" fill="#f59e0b" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                <Bar dataKey="hadir" name="Hadir" fill="#16a34a" radius={[8, 8, 0, 0]} maxBarSize={36} />
+                <Bar dataKey="terlambat" name="Terlambat" fill="#f59e0b" radius={[8, 8, 0, 0]} maxBarSize={36} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Belum absen */}
-        <Card className="flex flex-col p-5 lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Belum Absen Hari Ini</h3>
+        <Card className="flex flex-col overflow-hidden lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <h3 className="text-sm font-semibold text-foreground">Belum Absen Hari Ini</h3>
             <Badge variant="warning">{stats.notYetIds.length}</Badge>
           </div>
+          <div className="flex-1 p-5 pt-3">
           {todayIsOff ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               Hari ini hari libur/Minggu — tidak ada kewajiban absen.
@@ -217,11 +226,12 @@ export default function DashboardPage() {
           )}
           <Link
             href="/attendance"
-            className="mt-4 flex items-center justify-center gap-1 rounded-xl border border-border py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+            className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover"
           >
             Lihat Rekap Absensi
             <ArrowRight className="h-4 w-4" />
           </Link>
+          </div>
         </Card>
       </div>
 
