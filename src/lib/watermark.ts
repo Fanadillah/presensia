@@ -61,7 +61,7 @@ export async function addAttendanceWatermark(
       t.getMinutes()
     ).padStart(2, '0')}`;
     const coordStr = `${info.latitude.toFixed(6)}, ${info.longitude.toFixed(6)}`;
-    const accStr = info.accuracy ? ` (±${Math.round(info.accuracy)}m)` : '';
+    const accStr = info.accuracy ? ` (+/-${Math.round(info.accuracy)}m)` : '';
     const areaStr = info.withinGeofence
       ? `DI DALAM AREA${info.geofenceName ? ` - ${info.geofenceName}` : ''}`
       : 'DI LUAR AREA KANTOR';
@@ -72,9 +72,9 @@ export async function addAttendanceWatermark(
         (line, i) =>
           `<text x="${pad}" y="${y0 + pad + lineHeight * (i + 1) - Math.round(
             lineHeight * 0.25
-          )}" font-family="sans-serif" font-size="${fontSize}" font-weight="${
+          )}" font-family="'DejaVu Sans','Liberation Sans',Arial,sans-serif" font-size="${fontSize}" font-weight="${
             i === 2 ? '700' : '600'
-          }" fill="#ffffff" stroke="#000000" stroke-width="0.6">${escapeXml(line)}</text>`
+          }" fill="#ffffff" stroke="#000000" stroke-width="0.6" paint-order="stroke">${escapeXml(line)}</text>`
       )
       .join('');
 
