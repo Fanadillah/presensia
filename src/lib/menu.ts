@@ -12,6 +12,7 @@ import {
   PlaneTakeoff,
   LogIn,
   Wallet,
+  HelpCircle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -31,6 +32,7 @@ export const karyawanMenu: MenuItem[] = [
   { href: '/', label: 'Beranda', icon: Home },
   ...commonUserMenu,
   { href: '/profile', label: 'Profil', icon: UserRound },
+  { href: '/help', label: 'Panduan', icon: HelpCircle },
 ];
 
 // Admin juga absen pakai akunnya sendiri
@@ -44,6 +46,7 @@ export const adminMenu: MenuItem[] = [
   { href: '/leaves', label: 'Cuti & Lembur', icon: PlaneTakeoff },
   { href: '/audit', label: 'Audit Log', icon: ScrollText },
   { href: '/profile', label: 'Profil', icon: UserRound },
+  { href: '/help', label: 'Panduan', icon: HelpCircle },
 ];
 
 export const ownerMenu: MenuItem[] = [
@@ -57,6 +60,7 @@ export const ownerMenu: MenuItem[] = [
   { href: '/audit', label: 'Audit Log', icon: ScrollText },
   { href: '/settings', label: 'Pengaturan', icon: Settings },
   { href: '/profile', label: 'Profil', icon: UserRound },
+  { href: '/help', label: 'Panduan', icon: HelpCircle },
 ];
 
 export function getMenu(role?: string | null): MenuItem[] {
