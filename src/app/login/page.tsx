@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Clock } from 'lucide-react';
+import { Eye, EyeOff, MapPinned, Camera } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -80,11 +80,15 @@ export default function LoginPage() {
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-hover shadow-lg shadow-primary/30">
-            <Clock className="h-8 w-8 text-white" />
+          <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-hover shadow-lg shadow-primary/30">
+            <MapPinned className="h-8 w-8 text-white" />
+            <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-primary/20">
+              <Camera className="h-3.5 w-3.5 text-primary" />
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{BRANDING.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{BRANDING.description.split(' — ')[0]}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{BRANDING.name}</h1>
+          <p className="mt-1.5 text-sm font-medium tracking-wide text-muted-foreground">{BRANDING.description.split(' — ')[0]}</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">Geofence • Foto Selfie • Rekap Otomatis</p>
         </div>
 
         <form

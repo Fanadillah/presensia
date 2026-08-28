@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, Clock } from 'lucide-react';
+import { LogOut, MapPinned, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { getMenu } from '@/lib/menu';
@@ -29,8 +29,10 @@ export function Sidebar() {
       {/* Header glass terang */}
       <div className="flex items-center gap-3 border-b border-border/50 px-5 py-5">
         <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-hover shadow-md shadow-primary/20">
-          <Clock className="h-5 w-5 text-white" />
-          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-white shadow ring-2 ring-primary/20" />
+          <MapPinned className="h-5 w-5 text-white" />
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow ring-2 ring-primary/20">
+            <Camera className="h-2.5 w-2.5 text-primary" />
+          </span>
         </div>
         <div className="min-w-0">
           <h1 className="text-[15px] font-extrabold tracking-tight text-foreground">{BRANDING.name}</h1>
