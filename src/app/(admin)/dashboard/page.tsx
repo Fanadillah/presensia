@@ -9,6 +9,8 @@ import {
   AlertTriangle,
   Clock3,
   ArrowRight,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { createClient } from '@/lib/supabase/client';
@@ -145,7 +147,20 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <PageTitle title="Dashboard" description="Monitoring absensi hari ini" />
+      <PageTitle
+        title="Dashboard"
+        description="Monitoring absensi hari ini"
+        action={
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-surface-muted"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <Home className="h-4 w-4 text-muted-foreground" />
+            Kembali ke Beranda Karyawan
+          </Link>
+        }
+      />
 
       {/* Stat cards - minimal clean 4 col, border accent */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
